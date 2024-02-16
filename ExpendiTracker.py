@@ -2,6 +2,11 @@
 
 from Expenses import Expense
 
+import sqlite3
+
+CONN = sqlite3.connect('./ExpendiTracker.db')
+CURSOR = CONN.cursor()
+
 def main():
     print(f"Running expense tracker")
     pass
@@ -40,7 +45,7 @@ def get_expense():
 
         if index_selected in range(len(expense_categories)):
             selected_category = expense_categories[index_selected]
-            
+
             # New expense created as an instance of the Expense class
             new_expense = Expense(name=expense_name, category=selected_category, amount=expense_amount)
             return new_expense
@@ -51,8 +56,37 @@ def get_expense():
 
 
 
-def store_expense():
-    print("Saving the expenses")
+def store_expense(expenses):
+    print("Saving the expense...")
+    try:
+        # execute command for inserting into the expense table
+        CURSOR.execute("INSERT INTO Expenses (expense_name, expense_amount, cat_id) VALUES (?, ?, ?)",
+                       (expenses.name, expenses.amount, get_category_id(expenses.category)))
+        CONN.commit()
+        print("Expenses saved successfully!")
+    except sqlite3.Error as e:
+        print("Error occured while saving the expense:", e)
+
+
+
+def get_category_id(category_name):
+    try:
+        #  FEtch category id from given name
+         CURSOR.execute("SELECT category_id FROM Categories WHERE category_name = ?", (category_name,))
+         category_id = CURSOR.fetchone()
+         if category_id:
+             return category_id[0]
+         else:
+             print("Category not found in the database.")
+             return None 
+           
+    except sqlite3.Error as e:
+        print("ERror occured while fetching category ID:", e)
+    return None
+   
+
+
+
 
 def summarise_expense():
     print("Summarizing the expenses")
