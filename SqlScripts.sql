@@ -58,6 +58,9 @@ INSERT INTO Categories (category_id, category_name, category_description)
 values (5, 'Black Tax','Family');
 
 
-select * from categories;
+select category_id from categories where category_name = 'Enterntainment';
 
 select * from expenses;
+
+
+update Categories set category_name = 'Entertainment' where category_id = 3

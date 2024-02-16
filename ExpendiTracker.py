@@ -12,17 +12,17 @@ def main():
     pass
 
     # register user and budget
-    add_user_and_budget()
+    currentuser = add_user_and_budget()
 
     # input expense
-    expenses = get_expense()
+    expenses = get_expense(currentuser)
     print(expenses)
 
     # save expenses in db
     store_expense(expenses)
 
-    # read and summarise expenses
-    summarise_expense()
+    # # read and summarise expenses
+    # summarise_expense()
 
 def add_user_and_budget():
     print("Welcome to ExpendiTracker.")
@@ -50,12 +50,14 @@ def add_user_and_budget():
         print("Budget added successfully!")
     except sqlite3.Error as e:
         print("Error occurred while adding budget:", e)
+    
+    return username
 
-def get_expense():
-    expense_name = input("Enter the name of the expense: ")
+def get_expense(currentuser):
+    expense_name = input(f"{currentuser}, enter the name of the expense: ")
     expense_amount = float(input("Enter the amount of the expense: "))
     expense_category = input(f"Enter a category name:  ")
-    new_expense = Expense(name=expense_name, category=expense_category, amount=expense_amount)
+    new_expense = Expense(name=expense_name, category=expense_category, amount=expense_amount, expenseuser = currentuser)
     return new_expense
 
     # expense_categories = [
@@ -91,8 +93,8 @@ def store_expense(expenses):
     print("Saving the expense...")
     try:
         # execute command for inserting into the expense table
-        CURSOR.execute("INSERT INTO Expenses (expense_name, expense_amount, cat_id) VALUES (?, ?, ?)",
-                       (expenses.name, expenses.amount, get_category_id(expenses.category)))
+        CURSOR.execute("INSERT INTO Expenses (expense_name, expense_amount, cat_id, userid) VALUES (?, ?, ?, (SELECT user_id FROM Users WHERE username = ?))",
+                       (expenses.name, expenses.amount, get_category_id(expenses.category ), expenses.expenseuser))
         CONN.commit()
         print("Expenses saved successfully!")
     except sqlite3.Error as e:
