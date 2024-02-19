@@ -55,7 +55,14 @@ INSERT INTO Categories (category_id, category_name, category_description)
 values (4, 'Work','Business related');
 
 INSERT INTO Categories (category_id, category_name, category_description)
-values (5, 'Black Tax','Family');
+values (6, 'Full Month','All expenses combined');
+
+
+
+==== Bulk insert Expenses ====
+
+update budgets set category_id = 6 where user_id = 15
+
 
 
 select category_id from categories where category_name = 'Enterntainment';
@@ -64,3 +71,9 @@ select * from expenses;
 
 
 update Categories set category_name = 'Entertainment' where category_id = 3
+
+
+SELECT e.*, c.category_name 
+            FROM Expenses e 
+            JOIN Categories c ON e.cat_id = c.category_id
+            WHERE e.userid = (SELECT user_id FROM Users WHERE username = ?)

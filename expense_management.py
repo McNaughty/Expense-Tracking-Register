@@ -6,6 +6,7 @@ from Expenses import Expense
 # CONN = sqlite3.connect('./ExpendiTracker.db')
 # CURSOR = CONN.cursor()
 
+
 def get_expense(currentuser):
     expense_name = input(f"{currentuser}, enter the name of the expense: ")
     expense_amount = float(input("Enter the amount of the expense: "))
@@ -67,7 +68,7 @@ def get_category_id(category_name, cursor, connection):
              return None 
            
     except sqlite3.Error as e:
-        print("ERror occured while fetching category ID:", e)
+        print("Error occured while fetching category ID:", e)
     return None
 
 
