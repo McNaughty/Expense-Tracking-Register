@@ -61,6 +61,20 @@ values (6, 'Full Month','All expenses combined');
 
 ==== Bulk insert Expenses ====
 
+INSERT INTO Expenses (expense_id, expense_name, expense_amount, cat_id, userid)
+values (7, 'Gondwana','5000','3','1');
+
+INSERT INTO Expenses (expense_id, expense_name, expense_amount, cat_id, userid)
+values (8, 'Stationaries','1000','4','1');
+
+INSERT INTO Expenses (expense_id, expense_name, expense_amount, cat_id, userid)
+values (9, 'Electrical Repairds','5000','2','1');
+
+INSERT INTO Expenses (expense_id, expense_name, expense_amount, cat_id, userid)
+values (10, 'Contribution towards medical cover','2000','5','1');
+
+
+
 update budgets set category_id = 6 where user_id = 15
 
 

@@ -1,12 +1,14 @@
-# Main Python file
-
-import sqlite3
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from user_budget import add_user_and_budget
 from expense_management import get_expense, store_expense
-from expense_summaries import fetch_user_expenses, calculate_total_spent, generate_category_pie_chart,generate_expense_summary_report
+from expense_summaries import fetch_user_expenses, calculate_total_spent, generate_category_pie_chart, generate_expense_summary_report
+from models import User, Expense  # Importing SQLAlchemy models
 
-CONN = sqlite3.connect('./ExpendiTracker.db')
-CURSOR = CONN.cursor()
+# Create SQLAlchemy engine and session
+engine = create_engine('sqlite:///ExpendiTracker.db')  # Replace 'ExpendiTracker.db' with your actual database file
+Session = sessionmaker(bind=engine)
+session = Session()
 
 def print_menu():
     print("Welcome to ExpendiTracker.")
@@ -17,25 +19,19 @@ def print_menu():
 
 def main():
     print_menu()
-    optionSelected = input(": ")
+    option_selected = input(": ")
 
-    if (optionSelected == "1"):
-        currentuser = add_user_and_budget(CURSOR, CONN)
+    if option_selected == "1":
+        current_user = add_user_and_budget(session)
 
-    elif (optionSelected == "2"):
-        currentuser = input("Please sepecify your username: ")
-        expenses = get_expense(currentuser)
-        store_expense(expenses, CURSOR, CONN)  
+    elif option_selected == "2":
+        current_user = input("Please specify your username: ")
+        expenses = get_expense(current_user, session)
+        store_expense(expenses, session)
 
-    elif optionSelected == "3": 
+    elif option_selected == "3":
         username = input("Please specify your username: ")
-        expenses = fetch_user_expenses(username)
-        if expenses:
-            total_spent = calculate_total_spent(expenses)
-            print(f"Total amount spent by {username}: ${total_spent:.2f}")
-            generate_category_pie_chart(expenses)
-        else:
-            print("No expenses found for the user.")
+        generate_expense_summary_report(username, session)
 
 if __name__ == '__main__':
     main()

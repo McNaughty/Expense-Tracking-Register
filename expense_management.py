@@ -1,77 +1,60 @@
-import sqlite3
+from sqlalchemy import engine_from_config
+from models import Expense, User, Category  # Importing SQLAlchemy models
+from sqlalchemy.orm import sessionmaker
 
-from Expenses import Expense
+# Create SQLAlchemy session
+Session = sessionmaker(bind=engine_from_config)
+session = Session()
 
-
-# CONN = sqlite3.connect('./ExpendiTracker.db')
-# CURSOR = CONN.cursor()
-
-
-def get_expense(currentuser):
+def get_expense(currentuser, session):
     expense_name = input(f"{currentuser}, enter the name of the expense: ")
     expense_amount = float(input("Enter the amount of the expense: "))
     expense_category = input(f"Enter a category name:  ")
-    new_expense = Expense(name=expense_name, category=expense_category, amount=expense_amount, expenseuser = currentuser)
+
+    # Retrieve the User instance corresponding to the provided currentuser
+    user = session.query(User).filter(User.username == currentuser).first()
+    if not user:
+        print(f"User '{currentuser}' not found.")
+        return None
+
+    # Retrieve the Category instance corresponding to the provided category name
+    category = session.query(Category).filter(Category.category_name == expense_category).first()
+    if not category:
+        print(f"Category '{expense_category}' not found.")
+        return None
+
+    # Create a new Expense instance with the retrieved User and Category instances
+    new_expense = Expense(expense_name=expense_name, expense_amount=expense_amount, category=category, user=user)
     return new_expense
 
-    # expense_categories = [
-        #     "Food", "House Shopping", "Enterntainment", "Work", "Black Tax"
-        # ]
 
+def store_expense(expense, session):
+    if expense is None:
+        print("Expense object is None. Cannot save.")
+        return
 
-    # while True:
-    #     print("Select the expense category: ")
-    #     for i, category_name in enumerate(expense_categories):
-    #         print(f" {i + 1}. {category_name}")
-
-    #         # range selection for the users to know the number of options
-
-    #     range_selection = f"[1 - {len(expense_categories)}]"
-
-    #     index_selected = int(input(f"Enter a category number {range_selection}:  ")) - 1
-
-    #     if index_selected in range(len(expense_categories)):
-    #         selected_category = expense_categories[index_selected]
-
-    #         # New expense created as an instance of the Expense class
-    #         new_expense = Expense(name=expense_name, category=selected_category, amount=expense_amount)
-    #         return new_expense
-    #     else:
-    #         print("Category does not exist, kindly try again!")
-
-    #     break
-
-
-
-def store_expense(expenses, cursor, connection):
     print("Saving the expense...")
     try:
-        # execute command for inserting into the expense table
-        cursor.execute("INSERT INTO Expenses (expense_name, expense_amount, cat_id, userid) VALUES (?, ?, ?, (SELECT user_id FROM Users WHERE username = ?))",
-                       (expenses.name, expenses.amount, get_category_id(expenses.category,cursor, connection), expenses.expenseuser))
-        connection.commit()
-        print("Expenses saved successfully!")
-    except sqlite3.Error as e:
-        print("Error occured while saving the expense:", e)
+        session.add(expense)
+        session.commit()
+        print("Expense saved successfully!")
+    except Exception as e:
+        print("Error occurred while saving the expense:", e)
 
 
-
-def get_category_id(category_name, cursor, connection):
+def get_category_id(category_name, session):
     try:
-        #  FEtch category id from given name
-         cursor.execute("SELECT category_id FROM Categories WHERE category_name = ?", (category_name,))
-         category_id = cursor.fetchone()
-         if category_id:
-             return category_id[0]
-         else:
-             print("Category not found in the database.")
-             return None 
-           
-    except sqlite3.Error as e:
-        print("Error occured while fetching category ID:", e)
-    return None
+        category = session.query(Category).filter(Category.category_name == category_name).first()
+        if category:
+            return category.category_id
+        else:
+            print("Category not found in the database.")
+            return None
+    except Exception as e:
+        print("Error occurred while fetching category ID:", e)
+        return None
 
-
-   
-
-
+if __name__ == "__main__":
+    currentuser = input("Enter your username: ")
+    new_expense = get_expense(currentuser)
+    store_expense(new_expense, session)
