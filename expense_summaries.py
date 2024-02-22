@@ -15,7 +15,7 @@ def fetch_user_expenses(username, session):
     try:
         user = session.query(User).filter(User.username == username).first()
         if user:
-            expenses = session.query(Expense, Category.category_name).join(Category).filter(Expense.user_id == user.user_id).all()
+            expenses = session.query(Expense, Category.category_name).join(Category).filter(Expense.userid == user.user_id).all()
             return expenses
         else:
             print("User not found.")
@@ -45,8 +45,8 @@ def generate_category_pie_chart(expenses):
     plt.show()
 
 # Main function to generate user expense summary report
-def generate_expense_summary_report(username):
-    expenses = fetch_user_expenses(username)
+def generate_expense_summary_report(username, session):
+    expenses = fetch_user_expenses(username, session)
     if expenses:
         total_spent = calculate_total_spent(expenses)
         print(f"Total amount spent by {username}: ${total_spent:.2f}")
